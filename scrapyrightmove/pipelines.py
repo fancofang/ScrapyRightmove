@@ -10,7 +10,7 @@ import datetime
 
 class ScrapyrightmovePipeline(object):
 
-    collection_name = '12345'
+    collection_name = 'rightmove'
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
