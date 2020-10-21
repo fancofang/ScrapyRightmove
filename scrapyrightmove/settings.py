@@ -16,7 +16,7 @@ SPIDER_MODULES = ['scrapyrightmove.spiders']
 NEWSPIDER_MODULE = 'scrapyrightmove.spiders'
 
 MONGO_URI = 'mongodb://localhost:27017/'
-MONGO_DATABASE = 'test'
+MONGO_DATABASE = 'trackurent'
 
 
 today = datetime.now()
