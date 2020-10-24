@@ -76,6 +76,7 @@ venv.bak/
 *.db
 .idea
 logs/*
+*.log
 log/*
 !logs/.gitkeep
 backup/*
