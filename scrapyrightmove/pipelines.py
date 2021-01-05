@@ -40,19 +40,19 @@ class ScrapyrightmovePipeline(object):
         elif self.collection.find_one({'url': new_item['url'], 'rent.date': {"$gte": date}}):
             print("数据库日期已有该日期,更新其他数据")
             self.collection.update_one({'url': new_item['url']}, {"$set":{'maxprice':new_item['maxprice'],
-                                                                          'minprice':new_item['minprice'],
-                                                                          'letAgreed': new_item['letAgreed'],
-                                                                          'postcode': new_item['postcode'],
-                                                                          'location': new_item['location']
+                                                                          'minprice':new_item['minprice']
+                                                                          # 'letAgreed': new_item['letAgreed'],
+                                                                          # 'postcode': new_item['postcode'],
+                                                                          # 'location': new_item['location']
                                                                           # 'addTime': new_item['addTime']
                                                                           }})
         else:
             print("需要更新最新日期数据")
             self.collection.update_one({'url': new_item['url']}, {"$set":{'maxprice':new_item['maxprice'],
-                                                                          'minprice':new_item['minprice'],
-                                                                          'letAgreed': new_item['letAgreed'],
-                                                                          'postcode': new_item['postcode'],
-                                                                          'location': new_item['location']
+                                                                          'minprice':new_item['minprice']
+                                                                          # 'letAgreed': new_item['letAgreed'],
+                                                                          # 'postcode': new_item['postcode'],
+                                                                          # 'location': new_item['location']
                                                                           # 'addTime': new_item['addTime']
                                                                           },
                                                                   "$push": {'rent': new_item['rent'][0]}})
@@ -71,8 +71,6 @@ class ScrapyrightmovePipeline(object):
         temp.append(item['rent'])
         item['rent'] = temp
         return item
-
-
 
     def maxprice_item(self, item):
         data = self.collection.find_one({'url':item['url']})
