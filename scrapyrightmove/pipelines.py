@@ -43,8 +43,8 @@ class ScrapyrightmovePipeline(object):
                                                                           'minprice':new_item['minprice'],
                                                                           'letAgreed': new_item['letAgreed'],
                                                                           'postcode': new_item['postcode'],
-                                                                          'location': new_item['location'],
-                                                                          'addTime': new_item['addTime']
+                                                                          'location': new_item['location']
+                                                                          # 'addTime': new_item['addTime']
                                                                           }})
         else:
             print("需要更新最新日期数据")
@@ -52,8 +52,8 @@ class ScrapyrightmovePipeline(object):
                                                                           'minprice':new_item['minprice'],
                                                                           'letAgreed': new_item['letAgreed'],
                                                                           'postcode': new_item['postcode'],
-                                                                          'location': new_item['location'],
-                                                                          'addTime': new_item['addTime']
+                                                                          'location': new_item['location']
+                                                                          # 'addTime': new_item['addTime']
                                                                           },
                                                                   "$push": {'rent': new_item['rent'][0]}})
         return new_item

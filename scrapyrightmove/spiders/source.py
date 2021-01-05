@@ -10,49 +10,38 @@ class Myspider(scrapy.Spider):
     name = 'rightmove'
 
     start_urls = [
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=1200&minPrice=100'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&includeLetAgreed=true&maxDaysSinceAdded=14',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=1200&minPrice=100&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=1300&minPrice=1200'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&includeLetAgreed=true&maxDaysSinceAdded=14',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=1300&minPrice=1200&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=1400&minPrice=1300'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&includeLetAgreed=true&maxDaysSinceAdded=14',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=1400&minPrice=1300&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=1500&minPrice=1400'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=14',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=1500&minPrice=1400&sortType=2&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=1750&minPrice=1500'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=7',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=1750&minPrice=1500&sortType=2&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=2000&minPrice=1750'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=7',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=2000&minPrice=1750&sortType=2&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=2500&minPrice=2000'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=7',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=2500&minPrice=2000&sortType=2&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=3000&minPrice=2500'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=14',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=3000&minPrice=2500&sortType=2&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=3500&minPrice=3000'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=14',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=3500&minPrice=3000&sortType=2&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=5000&minPrice=3500'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=14',
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=5000&minPrice=3500&sortType=2&includeLetAgreed=false',
 
-        'https://www.rightmove.co.uk/property-to-rent/find.html?'
-        'locationIdentifier=REGION%5E87490&minBedrooms=1&maxPrice=20000&minPrice=5000'
-        '&propertyTypes=flat&dontShow=houseShare%2Cretirement&sortType=2&includeLetAgreed=true&maxDaysSinceAdded=14'
+        'https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E87490'
+        '&maxPrice=20000&minPrice=5000&sortType=2&includeLetAgreed=false'
     ]
 
     custom_settings = {
