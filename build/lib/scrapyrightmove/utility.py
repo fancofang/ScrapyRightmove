@@ -4,7 +4,7 @@ from datetime import datetime, date, time
 
 
 def extract_details(response):
-    pattern = re.compile(r"(?:window\.PAGE_MODEL)\s+=\s+(\{.*})", re.MULTILINE | re.DOTALL)
+    pattern = re.compile(r"window\.PAGE_MODEL = (\{.*})", re.MULTILINE | re.DOTALL)
     try:
         data = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)[0]
         details = json.loads(data)

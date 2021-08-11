@@ -24,13 +24,21 @@ class ScrapyrightmovePipeline(object):
         
         
     def init_query_template(self):
+        # self.property_query = ("SELECT rightmove_id "
+        #                 "FROM property_details "
+        #                 "WHERE rightmove_id = %s ")
+        
         self.property_query = ("SELECT rightmove_id "
                         "FROM property_details "
-                        "WHERE rightmove_id = %s ")
+                        "WHERE rightmove_id = {} ")
+        #
+        # self.peak_rent_query = ("SELECT property_id, max, min "
+        #                 "FROM peak_rent "
+        #                 "WHERE property_id = %s ")
 
-        self.peak_rent_query = ("SELECT property_id, max, min FROM peak_rent WHERE property_id = %s ")
+        # self.peak_rent_query = """SELECT property_id, max, min FROM peak_rent WHERE property_id = %s """
 
-        self.daily_rent_query = ("SELECT * FROM daily_rent WHERE property_id = %s AND date = %s ")
+        self.peak_rent_query = """SELECT property_id, max, min FROM peak_rent WHERE property_id = {} """
 
         # self.insert_property = ("INSERT INTO property_details "
         #                 "(rightmove_id, url, agent, title, address, postcode, create_date, location, letAgreed, thumbnail) "
@@ -100,25 +108,18 @@ class ScrapyrightmovePipeline(object):
         print("sssss :", time.time() - self.beginning_time)
     
     def process_item(self, item, spider):
-        if any(len(i) > 50 for i in (self.daily_rent_bulk, self.property_details_bulk, self.peak_rent_bulk)):
-            self.save_to_dbs(spider)
         # start_p = time.time()
         # self.query_cursor = self.db.cursor(buffered=True)
         # self.handle_cursor = self.db.cursor(buffered=True)
         # self.query_cursor.execute(self.property_query, (item['id'],))
         #
         # self.query_cursor.execute(self.peak_rent_query, (item['id'],))
-        self.query_cursor.execute(self.peak_rent_query,(item['id'],))
-        peak_rent_query_result = self.query_cursor.fetchone()
-        self.query_cursor.execute(self.property_query,(item['id'],))
-        property_rent_query_result = self.query_cursor.fetchone()
-        print(peak_rent_query_result, property_rent_query_result)
-        # print(query_result)
-        # print(query_result)
+        self.query_cursor.execute(self.peak_rent_query.format(item['id']))
+        query_result = self.query_cursor.fetchone()
 
         # print(query_result)
         #
-        if property_rent_query_result is None:
+        if query_result is None:
             # insert_property_item = (
             #     item['id'], item['url'], item['agent'], item['title'], item['address'], item['postcode'],
             #     item['create_time'], item['location'][0], item['location'][1], item['let_agreed'], item['image'])
@@ -128,18 +129,13 @@ class ScrapyrightmovePipeline(object):
 
             # insert_pr_item = (item['id'], item['rent'], item['rent'])
             # self.handle_cursor.execute(self.insert_peak_rent, item._values)
-        if peak_rent_query_result is None:
             self.peak_rent_bulk.append(item._values)
         else:
-            print(float(peak_rent_query_result[1]), float(peak_rent_query_result[2]), float(item['rent']))
-            self.handle_cursor.execute(self.update_max_peak, item._values) if float(peak_rent_query_result[1]) < float(item['rent']) else None
-            self.handle_cursor.execute(self.update_min_peak, item._values) if float(peak_rent_query_result[2]) > float(item['rent']) else None
-        self.query_cursor.execute(self.daily_rent_query, (item['id'],datetime.date.today()))
-        query_result = self.query_cursor.fetchone()
-        if query_result is None:
-            daily_item = item._values.copy()
-            daily_item['date'] = datetime.date.today()
-            self.daily_rent_bulk.append(daily_item)
+            self.handle_cursor.execute(self.update_max_peak, item._values) if float(query_result[1]) < float(item['rent']) else None
+            self.handle_cursor.execute(self.update_min_peak, item._values) if float(query_result[2]) > float(item['rent']) else None
+        daily_item = item._values.copy()
+        daily_item['date'] = datetime.date.today()
+        self.daily_rent_bulk.append(daily_item)
             # self.peak_rent_bulk.append(self.update_max_peak.format(**item._values)) if float(query_result[1]) < float(item['rent']) else None
             # self.peak_rent_bulk.append(self.update_min_peak.format(**item._values)) if float(
             #     query_result[2]) > float(item['rent']) else None
@@ -148,7 +144,24 @@ class ScrapyrightmovePipeline(object):
 
         # self.daily_rent_bulk.append(item._values, date = datetime.date.today())
 
-
+        if any(len(i) > 50 for i in (self.daily_rent_bulk, self.property_details_bulk, self.peak_rent_bulk)):
+            # try:
+            #     self.handle_cursor.executemany(self.insert_property, self.property_details_bulk)
+            #     # a = self.handle_cursor.rowcount
+            #     self.property_details_bulk = []
+            #     self.handle_cursor.executemany(self.insert_peak_rent, self.peak_rent_bulk)
+            #     # b = self.handle_cursor.rowcount
+            #     self.peak_rent_bulk = []
+            #     self.handle_cursor.executemany(self.insert_daily_rent, self.daily_rent_bulk)
+            #     # d = self.handle_cursor.rowcount
+            #     self.daily_rent_bulk = []
+            # except Exception as e:
+            #     spider.logger.error(str(e))
+            # finally:
+            #     self.db.commit()
+            # print(self.daily_rent_bulk, self.peak_rent_bulk, self.property_details_bulk)
+            # print(id(self.daily_rent_bulk), self.daily_rent_bulk)
+            self.save_to_dbs(spider)
         # a = self.query_cursor.execute(select_query,(item['id'],))
         # # for i in a:
         # #     print(i)
@@ -187,32 +200,20 @@ class ScrapyrightmovePipeline(object):
         # return new_item
     
     def save_to_dbs(self, spider):
-        insert_property_amount,insert_peak_amount,insert_daily_amount = 0,0,0
         try:
             self.handle_cursor.executemany(self.insert_property, self.property_details_bulk)
-            insert_property_amount = self.handle_cursor._rowcount
+            # a = self.handle_cursor.rowcount
             self.property_details_bulk = []
-        except Exception as e:
-            spider.logger.error("save to dbs error - insert_property: %s"% str(e))
-            print("error:",self.property_details_bulk)
-        try:
             self.handle_cursor.executemany(self.insert_peak_rent, self.peak_rent_bulk)
-            insert_peak_amount = self.handle_cursor._rowcount
+            # b = self.handle_cursor.rowcount
             self.peak_rent_bulk = []
-        except Exception as e:
-            spider.logger.error("save to dbs error - insert_peak: %s" % str(e))
-            print("error:", self.peak_rent_bulk)
-        try:
             self.handle_cursor.executemany(self.insert_daily_rent, self.daily_rent_bulk)
-            insert_daily_amount = self.handle_cursor._rowcount
+            # d = self.handle_cursor.rowcount
             self.daily_rent_bulk = []
         except Exception as e:
-            spider.logger.error("save to dbs error - insert_daily: %s" % str(e))
+            spider.logger.error(str(e))
         finally:
             self.db.commit()
-            spider.logger.info("Succefully insert to dbs this time: property-[%s], peak-[%s], daily-[%s]" % (insert_property_amount, insert_peak_amount, insert_daily_amount))
-
-            
             # print("成功插入property_details - [%s]条记录, peak_rent - [%s]条记录, daily_rent - [%s]条记录" %(a,b,d))
         
         # print("insert_peak_rent成功插入:", self.handle_cursor.rowcount, "记录")
