@@ -6,9 +6,16 @@ from datetime import datetime, date, time
 def extract_details(response):
     # pattern = re.compile(r"(?:window\.PAGE_MODEL) = (\{.*})", re.MULTILINE | re.DOTALL)
     pattern = re.compile(r"(?:window\.PAGE_MODEL)\s+=\s+(\{.*})", re.MULTILINE | re.DOTALL)
-    data = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)[0]
+    data = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)
+    if len(data) == 0 :
+        print(response)
+        print("11111111")
+        print(response.text)
+        print(response.status)
+        print("2222222222222")
     # data = response.xpath("//script[contains(., 'window.PAGE_MODEL')]/text()").re(pattern)[0]
     details = json.loads(data)
+    # print(type(details))
     return details
 
 def extract_id(response):

@@ -7,7 +7,7 @@ class Myspider(scrapy.Spider):
     name = 'rightmove'
 
     def start_requests(self):
-        urls = ['https://www.rightmove.co.uk/properties/110127902','https://www.rightmove.co.uk/properties/111710441']
+        urls = ['https://www.rightmove.co.uk/properties/110127902',]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse_details)
 
@@ -46,8 +46,7 @@ class Myspider(scrapy.Spider):
     def parse_details(self, response):
         print("url:",response.url)
         data = extract_details(response)
-        print(data)
-        
+        print("dddd:",data)
         # try:
         #     id = extract_id(data)
         #     title = extract_title(data)
