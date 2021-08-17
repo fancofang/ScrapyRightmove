@@ -3,6 +3,7 @@ from urllib.parse import urlparse, parse_qs, urlencode
 from scrapyrightmove.items import ScrapyrightmoveItem
 from scrapyrightmove.utility import *
 from openpyxl import load_workbook
+from collections import defaultdict
 import time
 import logging
 
@@ -11,6 +12,7 @@ class Myspider(scrapy.Spider):
     name = 'rightmove_latter'
     seen = set()
     count = 0
+    try_again = defaultdict(int)
     
     # def __init__(self, outcode):
     #     self.outcode_list = outcode
@@ -99,7 +101,7 @@ class Myspider(scrapy.Spider):
     def parse(self, response):
         self.logger.info('Parse function called on %s', response.url)
         Extract_total = response.xpath('//span[@class="searchHeader-resultCount"]/text()').get()
-        Extract_total = Extract_total.replay(',', '')
+        Extract_total = Extract_total.replace(',','')
         This_area_total = int(Extract_total)
 
         parsed = urlparse(response.url)
@@ -117,6 +119,12 @@ class Myspider(scrapy.Spider):
             if i not in self.seen:
                 self.seen.add(i)
                 yield response.follow(i, callback=self.parse_details)
+        for k,v in self.try_again.items():
+            if v >= 5 :
+                del self.try_again[k]
+                self.logger.info('%s won\'t parse again because failed to extract  %s times'% (k,v))
+            else:
+                yield response.follow(k, callback=self.parse_details)
 
         
         
@@ -151,8 +159,12 @@ class Myspider(scrapy.Spider):
         self.count += 1
         print("The crawling page is %s." % response.url)
         item = ScrapyrightmoveItem()
+        data = extract_details(response)
+        if not data:
+            self.try_again[response.url]+=1
+            self.logger.warning("%s runs %s times extract_details func failed" %(response.url, self.try_again[response.url]))
+            return
         try:
-            data = extract_details(response)
             item['id'] = extract_id(data)
             item['title'] = extract_title(data)
             item['address'] = extract_address(data)
@@ -166,7 +178,39 @@ class Myspider(scrapy.Spider):
             item['url'] = response.url
             item['let_agreed'] = extract_letagreed(data)
             item['thumbnail'] = extract_image(data)
+            # item = ScrapyrightmoveItem(id=id, url=response.url, agent=agent,
+            #                            addTime=addtime, title=title,
+            #                            address=address, rent={'date': date.today(), 'price': rent},
+            #                            letAgreed=letagreed, postcode=postcode, location=location
+            #                            )
             yield item
+            # print(item)
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error("parse_details error: %s" % str(e))
+            print("extraction error:", response.url)
+
+
+        # data = extract_details(response)
+        # try:
+        #     id = extract_id(data)
+        #     title = extract_title(data)
+        #     address = extract_address(data)
+        #     agent = extract_agentdetails(data)
+        #     rent = extract_rent(data)
+        #     location = extract_location(data)
+        #     postcode = extract_postcode(data)
+        #     # due to original url are filtered by letagree=False, so don't need to extract
+        #     # letagreed = extract_letagreed(data)
+        #     letagreed = False
+        #     addtime = extract_addtime(data)
+        #
+        #     item = ScrapyrightmoveItem(id=id, url=response.url, agent=agent,
+        #                                addTime=addtime, title=title,
+        #                                address=address, rent={'date': date.today(), 'price': rent},
+        #                                letAgreed=letagreed, postcode=postcode, location=location
+        #                                )
+        #     yield item
+        #     # print(item)
+        # except Exception as e:
+        #     self.logger.error(str(e))
 

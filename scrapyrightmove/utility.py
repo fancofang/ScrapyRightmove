@@ -5,18 +5,19 @@ from datetime import datetime, date, time
 
 def extract_details(response):
     pattern = re.compile(r"(?:window\.PAGE_MODEL)\s+=\s+(\{.*})", re.MULTILINE | re.DOTALL)
-    try:
-        data = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)[0]
-        details = json.loads(data)
-    except Exception as e:
-        raise e
+    datas = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)
+    if len(datas) == 0:
+        return False
+    else:
+        details = json.loads(datas[0])
     return details
 
 def extract_id(response):
     try:
         id = response['propertyData']['id']
     except:
-        id = None
+        pattern = re.compile(r"/(\d*)$")
+        id = pattern.findall(response.url)[0]
     return id
 
 def extract_title(response):
@@ -30,7 +31,7 @@ def extract_address(response):
     try:
         address = response['propertyData']['address']['displayAddress']
     except:
-        address = None
+        address = ""
     return address
 
 def extract_agentdetails(response):
@@ -50,7 +51,7 @@ def extract_rent(response):
             price = round(price * 4.334, 0)
         rent = int(price)
     except:
-        rent = None
+        rent = 0
     return rent
 
 def extract_location(response):
