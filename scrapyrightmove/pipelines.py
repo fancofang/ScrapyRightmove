@@ -105,7 +105,7 @@ class ScrapyrightmovePipeline(object):
             try:
                 self.handle_cursor.executemany(self.insert_property, self.property_details_bulk)
                 self.db.commit()
-                insert_property_amount = self.handle_cursor._rowcount
+                insert_property_amount = self.handle_cursor.rowcount
                 self.property_details_bulk = []
             except mysql.connector.Error as err:
                 spider.logger.error("save to dbs error - insert_property: %s"% str(err))
@@ -115,7 +115,7 @@ class ScrapyrightmovePipeline(object):
             try:
                 self.handle_cursor.executemany(self.insert_peak_rent, self.peak_rent_bulk)
                 self.db.commit()
-                insert_peak_amount = self.handle_cursor._rowcount
+                insert_peak_amount = self.handle_cursor.rowcount
                 self.peak_rent_bulk = []
             except mysql.connector.Error as err:
                 spider.logger.error("save to dbs error - insert_peak: %s" % str(err))
@@ -125,7 +125,7 @@ class ScrapyrightmovePipeline(object):
             try:
                 self.handle_cursor.executemany(self.insert_daily_rent, self.daily_rent_bulk)
                 self.db.commit()
-                insert_daily_amount = self.handle_cursor._rowcount
+                insert_daily_amount = self.handle_cursor.rowcount
                 self.daily_rent_bulk = []
             except mysql.connector.Error as err:
                 spider.logger.error("save to dbs error - insert_daily: %s" % str(err))
