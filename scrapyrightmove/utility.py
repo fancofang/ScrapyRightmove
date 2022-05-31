@@ -6,15 +6,16 @@ from datetime import datetime, date, time
 def extract_details(response):
     # pattern = re.compile(r"(?:window\.PAGE_MODEL) = (\{.*})", re.MULTILINE | re.DOTALL)
     pattern = re.compile(r"(?:window\.PAGE_MODEL)\s+=\s+(\{.*})", re.MULTILINE | re.DOTALL)
-    data = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)
+    xpath_result = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").get()
+    raw_data ="r'" + xpath_result + "'"
+    data =  pattern.findall(raw_data)
+    # data = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)
     if len(data) == 0 :
-        print(response)
-        print("11111111")
-        print(response.text)
-        print(response.status)
-        print("2222222222222")
+        return False
+    else:
     # data = response.xpath("//script[contains(., 'window.PAGE_MODEL')]/text()").re(pattern)[0]
-    details = json.loads(data)
+        details = json.loads(data[0])
+        print(details)
     # print(type(details))
     return details
 

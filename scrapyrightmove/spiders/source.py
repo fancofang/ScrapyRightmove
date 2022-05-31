@@ -7,7 +7,7 @@ class Myspider(scrapy.Spider):
     name = 'rightmove'
 
     def start_requests(self):
-        urls = ['https://www.rightmove.co.uk/properties/110127902',]
+        urls = ['https://www.rightmove.co.uk/properties/85373097#/?channel=RES_LET',]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse_details)
 
