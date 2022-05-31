@@ -6,18 +6,19 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 import mysql.connector
-import datetime
+from datetime import date,timedelta
 
 
 class ScrapyrightmovePipeline(object):
-    db_name = 'rightmove'
-    # db_name = 'test_scrapy'
+    # db_name = 'rightmove'
+    db_name = 'test_scrapy'
     
     def __init__(self, host, user, passwd):
         self.mysql_host = host
         self.mysql_user = user
         self.mysql_passwd = passwd
         self.init_query_template()
+        self.today = date.today()
         
         
     def init_query_template(self):
@@ -25,25 +26,27 @@ class ScrapyrightmovePipeline(object):
                         "FROM property_details "
                         "WHERE rightmove_id = %s ")
 
-        self.peak_rent_query = ("SELECT property_id, max, min FROM peak_rent WHERE property_id = %s ")
+        self.peak_rent_query = ("SELECT rightmove_id, max, min FROM peak_rent WHERE rightmove_id = %s ")
 
-        self.daily_rent_query = ("SELECT * FROM daily_rent WHERE property_id = %s AND date = %s ")
+        self.daily_rent_query = ("SELECT rent FROM daily_rent WHERE rightmove_id = %s AND date = %s ")
 
         self.insert_property = ("INSERT INTO property_details "
                                 "(rightmove_id, url, agent, title, address, postcode, create_date, location, letAgreed, thumbnail) "
                                 "VALUES (%(id)s, %(url)s, %(agent)s, %(title)s, %(address)s, %(postcode)s, %(create_date)s, POINT(%(latitude)s,%(longitude)s), %(let_agreed)s, %(thumbnail)s)")
         
         self.insert_daily_rent = ("INSERT INTO daily_rent "
-                                  "(property_id, rent, date) "
-                                  "VALUES (%(id)s, %(rent)s, %(date)s)")
+                                  "(rightmove_id, rent, date, compare) "
+                                  "VALUES (%(id)s, %(rent)s, %(date)s, %(compare)s)")
 
         self.insert_peak_rent = ("INSERT INTO peak_rent "
-                          "(property_id, max, min) "
+                          "(rightmove_id, max, min) "
                           "VALUES (%(id)s, %(rent)s, %(rent)s)")
         
-        self.update_max_peak = """ UPDATE peak_rent SET max = %(rent)s WHERE property_id = %(id)s """
+        self.update_max_peak = """ UPDATE peak_rent SET max = %(rent)s WHERE rightmove_id = %(id)s """
 
-        self.update_min_peak = """ UPDATE peak_rent SET min = %(rent)s WHERE property_id = %(id)s """
+        self.update_min_peak = """ UPDATE peak_rent SET min = %(rent)s WHERE rightmove_id = %(id)s """
+
+        self.update_let_agreed = """ UPDATE property_details SET letAgreed = %(let_agreed)s WHERE rightmove_id = %(id)s """
     
     @classmethod
     def from_crawler(cls, crawler):
@@ -76,26 +79,40 @@ class ScrapyrightmovePipeline(object):
     def process_item(self, item, spider):
         if item is None:
             return item
+        if item['let_agreed']:
+            self.handle_cursor.execute(self.update_let_agreed, item._values)
+            self.db.commit()
+            return item
         if any(len(i) > 50 for i in (self.daily_rent_bulk, self.property_details_bulk, self.peak_rent_bulk)):
             self.save_to_dbs(spider)
-        self.query_cursor.execute(self.peak_rent_query,(item['id'],))
-        peak_rent_query_result = self.query_cursor.fetchone()
-        
-        self.query_cursor.execute(self.property_query,(item['id'],))
-        property_rent_query_result = self.query_cursor.fetchone()
-        
-        if property_rent_query_result is None:
+        is_exist, result = self.is_exist(item)
+        if not is_exist:
             self.property_details_bulk.append(item._values)
-        if peak_rent_query_result is None:
             self.peak_rent_bulk.append(item._values)
         else:
-            self.handle_cursor.execute(self.update_max_peak, item._values) if float(peak_rent_query_result[1]) < float(item['rent']) else None
-            self.handle_cursor.execute(self.update_min_peak, item._values) if float(peak_rent_query_result[2]) > float(item['rent']) else None
-        self.query_cursor.execute(self.daily_rent_query, (item['id'],datetime.date.today()))
+            self.handle_cursor.execute(self.update_max_peak, item._values) if float(result[1]) < float(item['rent']) else None
+            self.handle_cursor.execute(self.update_min_peak, item._values) if float(result[2]) > float(item['rent']) else None
+            self.db.commit()
+        # self.query_cursor.execute(self.peak_rent_query,(item['id'],))
+        # peak_rent_query_result = self.query_cursor.fetchone()
+        #
+        # self.query_cursor.execute(self.property_query,(item['id'],))
+        # property_rent_query_result = self.query_cursor.fetchone()
+        #
+        # if property_rent_query_result is None:
+        #     self.property_details_bulk.append(item._values)
+        # if peak_rent_query_result is None:
+        #     self.peak_rent_bulk.append(item._values)
+        # else:
+        #     self.handle_cursor.execute(self.update_max_peak, item._values) if float(peak_rent_query_result[1]) < float(item['rent']) else None
+        #     self.handle_cursor.execute(self.update_min_peak, item._values) if float(peak_rent_query_result[2]) > float(item['rent']) else None
+        self.query_cursor.execute(self.daily_rent_query, (item['id'],self.today))
         query_result = self.query_cursor.fetchone()
         if query_result is None:
+            compare_result = self.compare_daily_rent(item)
             daily_item = item._values.copy()
-            daily_item['date'] = datetime.date.today()
+            daily_item['date'] = self.today
+            daily_item['compare'] = compare_result
             self.daily_rent_bulk.append(daily_item)
         return item
     
@@ -131,3 +148,22 @@ class ScrapyrightmovePipeline(object):
                 spider.logger.error("save to dbs error - insert_daily: %s" % str(err))
                 self.db.rollback()
         spider.logger.info("Succefully insert to dbs this time: property-[%s], peak-[%s], daily-[%s]" % (insert_property_amount, insert_peak_amount, insert_daily_amount))
+
+    def is_exist(self,item):
+        self.query_cursor.execute(self.peak_rent_query, (item['id'],))
+        query_result = self.query_cursor.fetchone()
+        if query_result is not None:
+            return True, query_result
+        else:
+            return False, None
+
+    def compare_daily_rent(self,item):
+        yesterday = self.today - timedelta(days=1)
+        self.query_cursor.execute(self.daily_rent_query, (item['id'],yesterday))
+        query_result = self.query_cursor.fetchone()
+        if query_result is not None:
+            if float(query_result[0] ) < float(item['rent']):
+                return 2
+            if float(query_result[0]) > float(item['rent']):
+                return 1
+        return 0

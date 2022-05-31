@@ -6,7 +6,7 @@ from openpyxl import load_workbook
 from collections import defaultdict
 
 class Myspider(scrapy.Spider):
-    name = 'rightmove_latter'
+    name = 'rightmove_spider2'
     seen = set()
     count = 0
     try_again = defaultdict(int)

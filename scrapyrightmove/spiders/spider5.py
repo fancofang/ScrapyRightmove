@@ -6,7 +6,7 @@ from openpyxl import load_workbook
 from collections import defaultdict
 
 class Myspider(scrapy.Spider):
-    name = 'rightmove_spider1'
+    name = 'rightmove_spider5'
     seen = set()
     count = 0
     try_again = defaultdict(int)
@@ -27,7 +27,7 @@ class Myspider(scrapy.Spider):
     def extract_code_from_excel(self):
         import os
         path = os.getcwd()
-        excel_path = os.path.join(path, 'postcode', 'postcode-outcodes1.xlsx')
+        excel_path = os.path.join(path, 'postcode', 'postcode-outcodes5.xlsx')
         outcode_list = []
         wb = load_workbook(excel_path)
         ws = wb['ran']
