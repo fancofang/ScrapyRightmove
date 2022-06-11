@@ -9,6 +9,14 @@ from scrapyrightmove.spiders.spider3 import Myspider as Spider3
 from scrapyrightmove.spiders.spider4 import Myspider as Spider4
 from scrapyrightmove.spiders.spider5 import Myspider as Spider5
 from scrapyrightmove.spiders.spider6 import Myspider as Spider6
+from scrapyrightmove.spiders.spider7 import Myspider as Spider7
+from scrapyrightmove.spiders.spider8 import Myspider as Spider8
+from scrapyrightmove.spiders.spider9 import Myspider as Spider9
+from scrapyrightmove.spiders.spider10 import Myspider as Spider10
+from scrapyrightmove.spiders.spider11 import Myspider as Spider11
+from scrapyrightmove.spiders.spider12 import Myspider as Spider12
+
+
 import time
 from dotenv import load_dotenv
 
@@ -25,6 +33,13 @@ if __name__ == '__main__':
     process.crawl(Spider4)
     process.crawl(Spider5)
     process.crawl(Spider6)
+    process.crawl(Spider7)
+    process.crawl(Spider8)
+    process.crawl(Spider9)
+    process.crawl(Spider10)
+    process.crawl(Spider11)
+    process.crawl(Spider12)
+
     process.start()
 
     print("--- %s seconds ---" % (time.time() - start))
