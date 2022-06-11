@@ -11,7 +11,7 @@ from datetime import date,timedelta
 
 class ScrapyrightmovePipeline(object):
     # db_name = 'rightmove'
-    db_name = 'test_scrapy'
+    db_name = 'rightmove'
     
     def __init__(self, host, user, passwd):
         self.mysql_host = host
@@ -85,14 +85,17 @@ class ScrapyrightmovePipeline(object):
             return item
         if any(len(i) > 50 for i in (self.daily_rent_bulk, self.property_details_bulk, self.peak_rent_bulk)):
             self.save_to_dbs(spider)
-        is_exist, result = self.is_exist(item)
-        if not is_exist:
-            self.property_details_bulk.append(item._values)
+        is_peak, result = self.is_exist_in_peak(item)
+        if not is_peak:
             self.peak_rent_bulk.append(item._values)
         else:
             self.handle_cursor.execute(self.update_max_peak, item._values) if float(result[1]) < float(item['rent']) else None
             self.handle_cursor.execute(self.update_min_peak, item._values) if float(result[2]) > float(item['rent']) else None
             self.db.commit()
+        is_property, _ = self.is_exist_in_property(item)
+        if not is_property:
+            self.property_details_bulk.append(item._values)
+
         # self.query_cursor.execute(self.peak_rent_query,(item['id'],))
         # peak_rent_query_result = self.query_cursor.fetchone()
         #
@@ -146,11 +149,20 @@ class ScrapyrightmovePipeline(object):
                 self.daily_rent_bulk = []
             except mysql.connector.Error as err:
                 spider.logger.error("save to dbs error - insert_daily: %s" % str(err))
+                print("error insert_daily_rent:", self.daily_rent_bulk[-1])
                 self.db.rollback()
         spider.logger.info("Succefully insert to dbs this time: property-[%s], peak-[%s], daily-[%s]" % (insert_property_amount, insert_peak_amount, insert_daily_amount))
 
-    def is_exist(self,item):
+    def is_exist_in_peak(self,item):
         self.query_cursor.execute(self.peak_rent_query, (item['id'],))
+        query_result = self.query_cursor.fetchone()
+        if query_result is not None:
+            return True, query_result
+        else:
+            return False, None
+
+    def is_exist_in_property(self,item):
+        self.query_cursor.execute(self.property_query, (item['id'],))
         query_result = self.query_cursor.fetchone()
         if query_result is not None:
             return True, query_result

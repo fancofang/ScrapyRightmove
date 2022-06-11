@@ -5,11 +5,14 @@ from datetime import datetime, date, time
 
 def extract_details(response):
     pattern = re.compile(r"(?:window\.PAGE_MODEL)\s+=\s+(\{.*})", re.MULTILINE | re.DOTALL)
-    datas = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)
-    if len(datas) == 0:
+    # datas = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").re(pattern)
+    xpath_result = response.xpath("//script[contains(text(), 'window.PAGE_MODEL')]/text()").get()
+    raw_data ="r'" + xpath_result + "'"
+    data =  pattern.findall(raw_data)
+    if len(data) == 0:
         return False
     else:
-        details = json.loads(datas[0])
+        details = json.loads(data[0])
     return details
 
 def extract_id(response):
@@ -50,6 +53,8 @@ def extract_rent(response):
         if price_cursor.group(2) != 'm':
             price = round(price * 4.334, 0)
         rent = int(price)
+        if rent > 10000000:
+            rent = 0
     except:
         rent = 0
     return rent
