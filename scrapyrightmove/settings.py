@@ -19,8 +19,7 @@ NEWSPIDER_MODULE = 'scrapyrightmove.spiders'
 MONGO_URI = 'mongodb://localhost:27017/'
 MONGO_DATABASE = 'trackurent'
 
-
-MYSQL_HOST = "localhost"
+MYSQL_HOST = os.getenv("MYSQL_HOST","localhost")
 MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWD = os.getenv("MYSQL_PASSWD")
 

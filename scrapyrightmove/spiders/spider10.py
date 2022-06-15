@@ -94,7 +94,7 @@ class Myspider(scrapy.Spider):
             item['url'] = response.url
             item['let_agreed'] = extract_letagreed(data)
             item['thumbnail'] = extract_image(data)
-            yield item
+            # yield item
         except Exception as e:
             self.logger.error("parse_details error: %s" % str(e))
             print("extraction error:", response.url)

@@ -10,8 +10,8 @@ from datetime import date,timedelta
 
 
 class ScrapyrightmovePipeline(object):
-    # db_name = 'rightmove'
     db_name = 'rightmove'
+    # db_name = 'test_scrapy'
     
     def __init__(self, host, user, passwd):
         self.mysql_host = host
@@ -118,7 +118,7 @@ class ScrapyrightmovePipeline(object):
             daily_item['compare'] = compare_result
             self.daily_rent_bulk.append(daily_item)
         return item
-    
+
     def save_to_dbs(self, spider):
         insert_property_amount,insert_peak_amount,insert_daily_amount = 0,0,0
         if self.property_details_bulk:
