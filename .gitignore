@@ -83,3 +83,6 @@ backup/*
 dump/
 result.json
 urlw2json.py
+
+# database
+backup/

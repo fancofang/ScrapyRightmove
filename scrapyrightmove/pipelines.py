@@ -11,7 +11,7 @@ from datetime import date,timedelta
 
 class ScrapyrightmovePipeline(object):
     # db_name = 'rightmove'
-    db_name = 'rightmove'
+    db_name = 'test_scrapy'
     
     def __init__(self, host, user, passwd):
         self.mysql_host = host
