@@ -7,11 +7,13 @@
 
 import mysql.connector
 from datetime import date,timedelta
+import os
 
 
 class ScrapyrightmovePipeline(object):
     # db_name = 'rightmove'
-    db_name = 'test_scrapy'
+    # db_name = 'test_scrapy'
+    db_name = os.getenv('DB_NAME','rightmove')
     
     def __init__(self, host, user, passwd):
         self.mysql_host = host
