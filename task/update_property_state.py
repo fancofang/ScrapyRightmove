@@ -23,16 +23,11 @@ def get_engine():
 if __name__ == "__main__":
     begin = time.time()
     engine = get_engine()
-    # with engine.connect() as connection:
-    #     result = connection.execute("show status")
-    #     # print(result)
-    #     for i in result:
-    #         print(i)
-    query_latest_day = text(
-        "select rightmove_id, max(date) "
-        "from daily_rent "
-        "group by rightmove_id"
-    )
+    # query_latest_day = text(
+    #     "select rightmove_id, max(date) "
+    #     "from daily_rent "
+    #     "group by rightmove_id"
+    # )
     stmt = text(
         "update property_details "
         "set letAgreed = 1 "
@@ -47,6 +42,6 @@ if __name__ == "__main__":
         )
     with engine.connect() as connection:
         result = connection.execute(stmt)
-        print(result)
+        print("match rows:", result.rowcount)
     print("finish ",time.time()-begin)
 
