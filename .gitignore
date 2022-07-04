@@ -73,16 +73,20 @@ venv.bak/
 .mypy_cache/
 
 # Development
-*.db
 .idea
-logs/*
-*.log
-log/*
-!logs/.gitkeep
 dump/
 result.json
 urlw2json.py
 
 # database
 backup/
+*.db
 *.sql
+
+# logs
+logs/*
+!logs/.gitkeep
+log/*
+*.log
+task/logs/*
+!task/logs/.gitkeep
